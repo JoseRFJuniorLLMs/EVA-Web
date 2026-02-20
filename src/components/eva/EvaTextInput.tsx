@@ -1,5 +1,5 @@
 import { useState, useRef, KeyboardEvent } from 'react';
-import { Send, Paperclip } from 'lucide-react';
+import { Send } from 'lucide-react';
 
 interface EvaTextInputProps {
   onSend: (text: string) => void;

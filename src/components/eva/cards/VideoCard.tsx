@@ -1,5 +1,6 @@
 import { Play, Film } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
+import { CardShell } from './CardShell';
 
 function toYouTubeEmbed(raw: string): string {
   try {
@@ -31,25 +32,17 @@ export function VideoCard({ event }: { event: ToolEvent }) {
     const embedUrl = toYouTubeEmbed(url);
 
     return (
-      <div className="rounded-xl border border-red-100 bg-white overflow-hidden">
-        <div className="flex items-center gap-2 px-3 py-2 bg-red-50 border-b border-red-100">
-          <Play className="w-4 h-4 text-red-600" />
-          <span className="text-xs font-semibold text-red-800 truncate">{title || 'Vídeo'}</span>
-        </div>
+      <CardShell icon={Play} title={title || 'Vídeo'} color="red">
         <div className="aspect-video">
           <iframe src={embedUrl} className="w-full h-full border-0" allowFullScreen allow="autoplay; encrypted-media" title={title} />
         </div>
-      </div>
+      </CardShell>
     );
   }
 
   // Video search results
   return (
-    <div className="rounded-xl border border-red-100 bg-white overflow-hidden">
-      <div className="flex items-center gap-2 px-3 py-2 bg-red-50 border-b border-red-100">
-        <Film className="w-4 h-4 text-red-600" />
-        <span className="text-xs font-semibold text-red-800">Vídeos encontrados</span>
-      </div>
+    <CardShell icon={Film} title="Vídeos encontrados" color="red">
       <div className="grid grid-cols-2 gap-2 p-2">
         {videos.length > 0 ? videos.slice(0, 4).map((v, i) => (
           <a key={i} href={v.url} target="_blank" rel="noopener noreferrer" className="group rounded-lg overflow-hidden bg-gray-50 hover:bg-gray-100 transition-colors">
@@ -60,6 +53,6 @@ export function VideoCard({ event }: { event: ToolEvent }) {
           <div className="col-span-2 px-3 py-3 text-sm text-gray-600">{String(d.message || 'Busca de vídeos realizada')}</div>
         )}
       </div>
-    </div>
+    </CardShell>
   );
 }

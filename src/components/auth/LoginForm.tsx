@@ -219,12 +219,16 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             )}
           </div>
 
-          {/* Demo credentials hint */}
-          <div className="mt-6 p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-500 text-center">
-              {t('auth.testCredentials')} <span className="font-mono">admin@malaria.ao</span> / <span className="font-mono">123456</span>
-            </p>
-          </div>
+          {/* Demo credentials hint — dev only */}
+          {import.meta.env.DEV && (
+            <div className="mt-6 p-3 bg-gray-50 rounded-lg">
+              <p className="text-xs text-gray-500 text-center">
+                {t('auth.testCredentials')}{' '}
+                <span className="font-mono">{import.meta.env.VITE_DEMO_EMAIL || 'admin@malaria.ao'}</span> /{' '}
+                <span className="font-mono">{import.meta.env.VITE_DEMO_PASSWORD || '123456'}</span>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Footer */}

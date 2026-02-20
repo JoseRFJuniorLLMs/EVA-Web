@@ -1,10 +1,11 @@
-import React, { lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster, toast } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { LoginForm } from './components/auth';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const EvaPage = lazy(() => import('./pages/EvaPage').then(m => ({ default: m.EvaPage })));
 const LogPage = lazy(() => import('./pages/LogPage').then(m => ({ default: m.LogPage })));
@@ -66,6 +67,7 @@ function App() {
         />
         <BrowserRouter basename="/eva" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AuthProvider>
+            <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
@@ -74,6 +76,7 @@ function App() {
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>
+            </ErrorBoundary>
           </AuthProvider>
         </BrowserRouter>
       </LanguageProvider>

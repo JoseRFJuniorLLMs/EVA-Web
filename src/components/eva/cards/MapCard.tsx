@@ -1,5 +1,6 @@
 import { MapPin, Navigation, Bus } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
+import { CardShell } from './CardShell';
 
 export function MapCard({ event }: { event: ToolEvent }) {
   const d = event.toolData as Record<string, unknown>;
@@ -17,27 +18,22 @@ export function MapCard({ event }: { event: ToolEvent }) {
     ? `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}&layer=mapnik&marker=${lat},${lng}`
     : null;
 
-  return (
-    <div className="rounded-xl border border-teal-100 bg-white overflow-hidden">
-      <div className="flex items-center gap-2 px-3 py-2 bg-teal-50 border-b border-teal-100">
-        {isDirections ? <Navigation className="w-4 h-4 text-teal-600" /> :
-         isTransport ? <Bus className="w-4 h-4 text-teal-600" /> :
-         <MapPin className="w-4 h-4 text-teal-600" />}
-        <span className="text-xs font-semibold text-teal-800">
-          {isDirections ? 'Direções' : isTransport ? 'Transporte' : 'Lugares Próximos'}
-        </span>
-        {lat && lng && (
-          <a
-            href={`https://www.google.com/maps?q=${lat},${lng}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-auto text-xs text-teal-600 hover:underline"
-          >
-            Abrir no Maps
-          </a>
-        )}
-      </div>
+  const headerIcon = isDirections ? Navigation : isTransport ? Bus : MapPin;
+  const headerTitle = isDirections ? 'Direções' : isTransport ? 'Transporte' : 'Lugares Próximos';
 
+  const mapsBadge = lat && lng ? (
+    <a
+      href={`https://www.google.com/maps?q=${lat},${lng}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-xs text-teal-600 hover:underline"
+    >
+      Abrir no Maps
+    </a>
+  ) : undefined;
+
+  return (
+    <CardShell icon={headerIcon} title={headerTitle} color="teal" badge={mapsBadge}>
       {mapEmbed && (
         <iframe src={mapEmbed} className="w-full h-40 border-0" title="map" loading="lazy" />
       )}
@@ -64,6 +60,6 @@ export function MapCard({ event }: { event: ToolEvent }) {
           <div className="px-3 py-3 text-sm text-gray-600">{msg || 'Localização processada'}</div>
         )}
       </div>
-    </div>
+    </CardShell>
   );
 }

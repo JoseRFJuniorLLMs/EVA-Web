@@ -1,5 +1,6 @@
 import { Home, Lightbulb, Thermometer, Power } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
+import { CardShell } from './CardShell';
 
 export function SmartHomeCard({ event }: { event: ToolEvent }) {
   const d = event.toolData as Record<string, unknown>;
@@ -9,11 +10,7 @@ export function SmartHomeCard({ event }: { event: ToolEvent }) {
   const msg = (d.message as string) || '';
 
   return (
-    <div className="rounded-xl border border-amber-100 bg-white overflow-hidden">
-      <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border-b border-amber-100">
-        <Home className="w-4 h-4 text-amber-600" />
-        <span className="text-xs font-semibold text-amber-800">Casa Inteligente</span>
-      </div>
+    <CardShell icon={Home} title="Casa Inteligente" color="amber">
       <div className="px-3 py-2">
         {devices.length > 0 ? (
           <div className="grid grid-cols-2 gap-2">
@@ -36,6 +33,6 @@ export function SmartHomeCard({ event }: { event: ToolEvent }) {
           </div>
         )}
       </div>
-    </div>
+    </CardShell>
   );
 }

@@ -1,5 +1,6 @@
-import { BookOpen, GraduationCap, BarChart3, ListChecks } from 'lucide-react';
+import { BookOpen, BarChart3, ListChecks } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
+import { CardShell } from './CardShell';
 
 export function EducationCard({ event }: { event: ToolEvent }) {
   const d = event.toolData as Record<string, unknown>;
@@ -14,17 +15,12 @@ export function EducationCard({ event }: { event: ToolEvent }) {
   const isCurriculum = event.tool === 'list_curriculum' || event.tool === 'add_to_curriculum';
   const isKnowledge = event.tool === 'search_knowledge';
 
+  const headerIcon = isProgress ? BarChart3 : isCurriculum ? ListChecks : BookOpen;
+  const headerTitle = isProgress ? 'Progresso' : isCurriculum ? 'Currículo' : isKnowledge ? 'Conhecimento' : topic || 'Educação';
+  const progressBadge = progress !== undefined ? <span className="text-xs text-indigo-600">{progress}%</span> : undefined;
+
   return (
-    <div className="rounded-xl border border-indigo-100 bg-white overflow-hidden">
-      <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border-b border-indigo-100">
-        {isProgress ? <BarChart3 className="w-4 h-4 text-indigo-600" /> :
-         isCurriculum ? <ListChecks className="w-4 h-4 text-indigo-600" /> :
-         <BookOpen className="w-4 h-4 text-indigo-600" />}
-        <span className="text-xs font-semibold text-indigo-800">
-          {isProgress ? 'Progresso' : isCurriculum ? 'Currículo' : isKnowledge ? 'Conhecimento' : topic || 'Educação'}
-        </span>
-        {progress !== undefined && <span className="text-xs text-indigo-600 ml-auto">{progress}%</span>}
-      </div>
+    <CardShell icon={headerIcon} title={headerTitle} color="indigo" badge={progressBadge}>
       <div className="px-3 py-3">
         {isProgress && progress !== undefined && (
           <div className="w-full h-3 bg-indigo-100 rounded-full overflow-hidden mb-2">
@@ -59,6 +55,6 @@ export function EducationCard({ event }: { event: ToolEvent }) {
           </div>
         )}
       </div>
-    </div>
+    </CardShell>
   );
 }

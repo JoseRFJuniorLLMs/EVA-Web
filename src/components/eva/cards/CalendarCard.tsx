@@ -1,5 +1,6 @@
-import { Calendar, Clock, MapPin, Check, X } from 'lucide-react';
+import { Calendar, Clock, MapPin } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
+import { CardShell } from './CardShell';
 
 export function CalendarCard({ event }: { event: ToolEvent }) {
   const d = event.toolData as Record<string, unknown>;
@@ -12,11 +13,7 @@ export function CalendarCard({ event }: { event: ToolEvent }) {
   // Single event
   if (title || start) {
     return (
-      <div className="rounded-xl border border-blue-100 bg-white overflow-hidden">
-        <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border-b border-blue-100">
-          <Calendar className="w-4 h-4 text-blue-600" />
-          <span className="text-xs font-semibold text-blue-800">Compromisso</span>
-        </div>
+      <CardShell icon={Calendar} title="Compromisso" color="blue">
         <div className="px-3 py-3 space-y-2">
           <p className="text-sm font-medium text-gray-900">{title}</p>
           {start && (
@@ -31,17 +28,13 @@ export function CalendarCard({ event }: { event: ToolEvent }) {
           )}
           {msg && <p className="text-xs text-gray-500">{msg}</p>}
         </div>
-      </div>
+      </CardShell>
     );
   }
 
   // Event list
   return (
-    <div className="rounded-xl border border-blue-100 bg-white overflow-hidden">
-      <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border-b border-blue-100">
-        <Calendar className="w-4 h-4 text-blue-600" />
-        <span className="text-xs font-semibold text-blue-800">Agenda</span>
-      </div>
+    <CardShell icon={Calendar} title="Agenda" color="blue">
       <div className="divide-y divide-gray-50">
         {events.length > 0 ? events.map((ev, i) => (
           <div key={i} className="px-3 py-2">
@@ -55,6 +48,6 @@ export function CalendarCard({ event }: { event: ToolEvent }) {
           <div className="px-3 py-3 text-sm text-gray-600">{msg || 'Calendário atualizado'}</div>
         )}
       </div>
-    </div>
+    </CardShell>
   );
 }

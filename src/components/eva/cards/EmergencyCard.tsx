@@ -1,4 +1,4 @@
-import { AlertTriangle, Phone, Shield, CheckCircle } from 'lucide-react';
+import { AlertTriangle, Phone, CheckCircle } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
 
 const CONTACT_LABELS: Record<string, string> = {

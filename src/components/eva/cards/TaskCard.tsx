@@ -1,5 +1,6 @@
-import { CheckSquare, Bell, Circle, CheckCircle2, Trash2 } from 'lucide-react';
+import { CheckSquare, Bell, Circle, CheckCircle2 } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
+import { CardShell } from './CardShell';
 
 export function TaskCard({ event }: { event: ToolEvent }) {
   const d = event.toolData as Record<string, unknown>;
@@ -10,11 +11,7 @@ export function TaskCard({ event }: { event: ToolEvent }) {
 
   if (isAlarm) {
     return (
-      <div className="rounded-xl border border-orange-100 bg-white overflow-hidden">
-        <div className="flex items-center gap-2 px-3 py-2 bg-orange-50 border-b border-orange-100">
-          <Bell className="w-4 h-4 text-orange-600" />
-          <span className="text-xs font-semibold text-orange-800">Alarmes</span>
-        </div>
+      <CardShell icon={Bell} title="Alarmes" color="orange">
         <div className="px-3 py-2">
           {alarms.length > 0 ? alarms.map((a, i) => (
             <div key={i} className="flex items-center gap-2 py-1.5">
@@ -26,16 +23,12 @@ export function TaskCard({ event }: { event: ToolEvent }) {
             <p className="text-sm text-gray-600 py-1">{msg || 'Alarme configurado'}</p>
           )}
         </div>
-      </div>
+      </CardShell>
     );
   }
 
   return (
-    <div className="rounded-xl border border-amber-100 bg-white overflow-hidden">
-      <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border-b border-amber-100">
-        <CheckSquare className="w-4 h-4 text-amber-600" />
-        <span className="text-xs font-semibold text-amber-800">Tarefas</span>
-      </div>
+    <CardShell icon={CheckSquare} title="Tarefas" color="amber">
       <div className="px-3 py-2">
         {tasks.length > 0 ? tasks.map((t, i) => (
           <div key={i} className="flex items-center gap-2 py-1.5">
@@ -47,6 +40,6 @@ export function TaskCard({ event }: { event: ToolEvent }) {
           <p className="text-sm text-gray-600 py-1">{msg || 'Tarefa processada'}</p>
         )}
       </div>
-    </div>
+    </CardShell>
   );
 }

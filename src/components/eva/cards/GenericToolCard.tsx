@@ -1,15 +1,5 @@
-import { Wrench, CheckCircle, AlertCircle, Webhook, Zap, Cpu, Globe, Code2, Brain } from 'lucide-react';
+import { Wrench, CheckCircle, AlertCircle } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
-import type { ToolCategory } from '../../../types/eva-tools';
-
-const CATEGORY_ICONS: Partial<Record<ToolCategory, typeof Wrench>> = {
-  browser: Globe,
-  webhooks: Webhook,
-  skills: Zap,
-  execute: Code2,
-  selfaware: Brain,
-  camera: Cpu,
-};
 
 export function GenericToolCard({ event }: { event: ToolEvent }) {
   const d = event.toolData as Record<string, unknown>;

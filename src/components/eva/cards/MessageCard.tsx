@@ -1,4 +1,4 @@
-import { MessageCircle, Send, CheckCircle } from 'lucide-react';
+import { MessageCircle, CheckCircle } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
 
 const PLATFORM_COLORS: Record<string, { bg: string; text: string; icon: string }> = {

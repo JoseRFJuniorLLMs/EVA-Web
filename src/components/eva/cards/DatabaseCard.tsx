@@ -1,4 +1,4 @@
-import { Database, Table, Network } from 'lucide-react';
+import { Database, Network } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
 
 export function DatabaseCard({ event }: { event: ToolEvent }) {

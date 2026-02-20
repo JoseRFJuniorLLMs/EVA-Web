@@ -1,28 +1,23 @@
 import { Scale, FileText, BookOpen } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
+import { CardShell } from './CardShell';
 
 export function LegalCard({ event }: { event: ToolEvent }) {
   const d = event.toolData as Record<string, unknown>;
   const rights = (d.rights as string[]) || [];
   const term = (d.term as string) || '';
   const definition = (d.definition as string) || (d.explanation as string) || '';
-  const status = (d.status as string) || '';
   const documents = (d.documents as Array<{ name: string; status: string }>) || [];
   const msg = (d.message as string) || '';
 
   const isRights = event.tool === 'get_elderly_rights';
   const isDocStatus = event.tool === 'document_status';
 
+  const headerIcon = isRights ? Scale : isDocStatus ? FileText : BookOpen;
+  const headerTitle = isRights ? 'Direitos do Idoso' : isDocStatus ? 'Status de Documentos' : term || 'Jurídico';
+
   return (
-    <div className="rounded-xl border border-stone-200 bg-white overflow-hidden">
-      <div className="flex items-center gap-2 px-3 py-2 bg-stone-50 border-b border-stone-200">
-        {isRights ? <Scale className="w-4 h-4 text-stone-600" /> :
-         isDocStatus ? <FileText className="w-4 h-4 text-stone-600" /> :
-         <BookOpen className="w-4 h-4 text-stone-600" />}
-        <span className="text-xs font-semibold text-stone-800">
-          {isRights ? 'Direitos do Idoso' : isDocStatus ? 'Status de Documentos' : term || 'Jurídico'}
-        </span>
-      </div>
+    <CardShell icon={headerIcon} title={headerTitle} color="stone">
       <div className="px-3 py-3">
         {rights.length > 0 && (
           <ul className="space-y-1.5">
@@ -51,6 +46,6 @@ export function LegalCard({ event }: { event: ToolEvent }) {
         {definition && <p className="text-sm text-gray-700 leading-relaxed">{definition}</p>}
         {!rights.length && !documents.length && !definition && msg && <p className="text-sm text-gray-600">{msg}</p>}
       </div>
-    </div>
+    </CardShell>
   );
 }
