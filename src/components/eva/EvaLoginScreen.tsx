@@ -28,23 +28,9 @@ export function EvaLoginScreen({ onAuthenticated }: EvaLoginScreenProps) {
     const rawCpf = cpf.replace(/\D/g, '');
     if (rawCpf.length !== 11) return;
 
-    setIdosoData({ id: 0, nome: '' });
-
-    try {
-      setGoogleLoading(true);
-      const res = await fetch(`/api/v1/idosos/by-cpf/${rawCpf}/google-status`);
-      if (res.ok) {
-        const data = await res.json();
-        setGoogleStatus(data);
-        if (data.connected) {
-          setGoogleLoading(false);
-          onAuthenticated(cpf, data);
-          return;
-        }
-      }
-    } catch { /* ignore */ }
-    setGoogleLoading(false);
-    setLoginStep('google');
+    // Google OAuth disabled temporarily (requires HTTPS with valid cert + real domain)
+    // TODO: Re-enable when domain + Let's Encrypt is configured
+    onAuthenticated(cpf, null);
   };
 
   const handleConnectGoogle = () => {
