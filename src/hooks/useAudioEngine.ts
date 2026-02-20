@@ -96,7 +96,7 @@ export function useAudioEngine() {
     animFrameRef.current = requestAnimationFrame(drawWaveform);
 
     if (!inputCtx.audioWorklet) throw new Error('AudioWorklet not supported');
-    await inputCtx.audioWorklet.addModule('/audio-processor.js');
+    await inputCtx.audioWorklet.addModule(import.meta.env.BASE_URL + 'audio-processor.js');
     await inputCtx.resume();
     await outputCtx.resume();
 
