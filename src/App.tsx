@@ -36,7 +36,7 @@ function LoginPage() {
           description: 'Bem-vindo ao EVA',
           duration: 4000,
         });
-        navigate('/eva', { replace: true });
+        navigate('/', { replace: true });
       }}
     />
   );
@@ -48,7 +48,7 @@ function NotFoundPage() {
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-800 mb-4">404</h1>
         <p className="text-gray-600 mb-4">Página não encontrada</p>
-        <a href="/eva" className="text-emerald-600 hover:underline">Ir para EVA</a>
+        <a href="/eva/" className="text-emerald-600 hover:underline">Ir para EVA</a>
       </div>
     </div>
   );
@@ -64,14 +64,13 @@ function App() {
           closeButton
           toastOptions={{ style: { fontFamily: 'inherit' } }}
         />
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <BrowserRouter basename="/eva" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AuthProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/eva" element={<EvaPage />} />
+                <Route path="/" element={<EvaPage />} />
                 <Route path="/log" element={<LogPage />} />
-                <Route path="/" element={<Navigate to="/eva" replace />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>
