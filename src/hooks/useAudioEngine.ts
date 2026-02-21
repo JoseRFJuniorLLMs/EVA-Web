@@ -100,7 +100,9 @@ export function useAudioEngine() {
     await inputCtx.resume();
     await outputCtx.resume();
 
-    const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const micStream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+    });
     micStreamRef.current = micStream;
 
     return micStream;
