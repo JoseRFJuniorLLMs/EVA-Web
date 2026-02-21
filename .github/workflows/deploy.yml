@@ -1,0 +1,64 @@
+name: Deploy EVA-Web
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch: {}
+
+env:
+  VM_IP: ${{ secrets.VM_IP }}
+  VM_USER: "web2a"
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build
+        run: npm run build
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ env.VM_IP }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy to VM
+        run: |
+          ssh ${{ env.VM_USER }}@${{ env.VM_IP }} "rm -rf /tmp/eva-web-dist"
+          scp -r dist ${{ env.VM_USER }}@${{ env.VM_IP }}:/tmp/eva-web-dist
+
+          ssh ${{ env.VM_USER }}@${{ env.VM_IP }} '
+            set -e
+            sudo rm -rf /var/www/malaria/eva
+            sudo mkdir -p /var/www/malaria/eva
+            sudo cp -r /tmp/eva-web-dist/* /var/www/malaria/eva/
+            sudo chown -R www-data:www-data /var/www/malaria/eva
+            rm -rf /tmp/eva-web-dist
+            echo "EVA-Web deployed to /eva/"
+          '
+
+      - name: Health check
+        run: |
+          sleep 3
+          HTTP_CODE=$(curl -sk -o /dev/null -w "%{http_code}" --connect-timeout 15 https://${{ env.VM_IP }}/eva/ || echo "000")
+          echo "Health check: HTTP $HTTP_CODE"
+          if [ "$HTTP_CODE" = "000" ]; then
+            echo "ERROR: Could not connect"
+            exit 1
+          fi
+          echo "EVA-Web OK (HTTP $HTTP_CODE)"
