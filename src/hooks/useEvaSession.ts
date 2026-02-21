@@ -213,7 +213,8 @@ export function useEvaSession(cpf: string, t: (key: string) => string) {
         }
       };
 
-      ws.onerror = () => {
+      ws.onerror = (event) => {
+        console.error('EvaSession: WebSocket error:', event);
         // onclose will fire after onerror, reconnect logic is there
       };
 
