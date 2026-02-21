@@ -226,8 +226,11 @@ export function useEvaSession(cpf: string, t: (key: string) => string) {
     }
   }, [cpf, audioEngine, videoCapture, sendFrame, stopSession, cleanup, handleToolEvent, executeAction, t]);
 
-  // Cleanup on unmount
-  useEffect(() => () => cleanup(), [cleanup]);
+  // Cleanup on unmount only (ref avoids re-running on every render)
+  const cleanupRef = useRef(cleanup);
+  cleanupRef.current = cleanup;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => () => cleanupRef.current(), []);
 
   return {
     // State
