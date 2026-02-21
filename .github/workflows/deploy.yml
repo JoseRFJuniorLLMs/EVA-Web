@@ -33,9 +33,13 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ env.VM_IP }} >> ~/.ssh/known_hosts 2>/dev/null
+          echo "Host *
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking accept-new" > ~/.ssh/config
+          chmod 600 ~/.ssh/config
 
       - name: Deploy to VM
         run: |
@@ -44,12 +48,12 @@ jobs:
 
           ssh ${{ env.VM_USER }}@${{ env.VM_IP }} '
             set -e
-            sudo rm -rf /var/www/malaria/eva
-            sudo mkdir -p /var/www/malaria/eva
-            sudo cp -r /tmp/eva-web-dist/* /var/www/malaria/eva/
-            sudo chown -R www-data:www-data /var/www/malaria/eva
+            sudo rm -rf /var/www/eva-web
+            sudo mkdir -p /var/www/eva-web
+            sudo cp -r /tmp/eva-web-dist/* /var/www/eva-web/
+            sudo chown -R www-data:www-data /var/www/eva-web
             rm -rf /tmp/eva-web-dist
-            echo "EVA-Web deployed to /eva/"
+            echo "EVA-Web deployed to /var/www/eva-web/"
           '
 
       - name: Health check
