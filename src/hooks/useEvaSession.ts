@@ -260,6 +260,18 @@ export function useEvaSession(cpf: string, t: (key: string) => string) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => () => cleanupRef.current(), []);
 
+  // WebMCP bridge: expõe funções de sessão para agentes de IA
+  useEffect(() => {
+    window.__evaSession = {
+      startSession,
+      stopSession,
+      sendTextMessage,
+      switchMode,
+      getStatus: () => ({ activeMode, sessionStatus, isSpeaking: audioEngine.isSpeaking }),
+    };
+    return () => { delete window.__evaSession; };
+  }, [startSession, stopSession, sendTextMessage, switchMode, activeMode, sessionStatus, audioEngine.isSpeaking]);
+
   return {
     // State
     activeMode,
