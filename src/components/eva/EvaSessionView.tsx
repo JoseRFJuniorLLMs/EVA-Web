@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo, memo } from 'react';
-import { Mic, Monitor, Camera, Mail, Calendar, PlayCircle, HardDrive, Search, MapPin, MessageSquare, Bell } from 'lucide-react';
+import { Mic, Monitor, Camera, User, Mail, Calendar, PlayCircle, HardDrive, Search, MapPin, MessageSquare, Bell } from 'lucide-react';
 import { EvaTextInput } from './EvaTextInput';
 import { EvaToolCard } from './EvaToolCard';
 import { EvaQuickActions } from './EvaQuickActions';
@@ -47,9 +47,9 @@ interface EvaSessionViewProps {
 }
 
 export const EvaSessionView = memo(function EvaSessionView({
-  messages, subtitleText, speakerInfo: _speakerInfo, activeMode, isSpeaking, sessionStatus,
+  messages, subtitleText, activeMode, isSpeaking, sessionStatus,
   toolEvents, activeMusic, activeTimer,
-  waveCanvasRef, onSendText, onDismissEvent, onSwitchMode, t,
+  waveCanvasRef, onSendText, onDismissEvent, onSwitchMode, t, speakerInfo,
 }: EvaSessionViewProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollThrottleRef = useRef(false);
@@ -77,7 +77,43 @@ export const EvaSessionView = memo(function EvaSessionView({
 
   return (
     <>
-      {/* Speaker Info — DESATIVADO (causa re-renders frequentes que cortam áudio) */}
+      {/* Speaker recognition badge */}
+      {speakerInfo && isActive && (
+        <div className="flex items-center gap-3 px-4 py-2 border-b border-gray-100 bg-gray-50/50">
+          <div className="flex items-center gap-2">
+            <User className="w-3.5 h-3.5 text-gray-500" />
+            <span className="text-xs font-medium text-gray-700">
+              {speakerInfo.name}{speakerInfo.isNew ? ` ${t('eva.newSpeaker')}` : ''}
+            </span>
+            {speakerInfo.confidence > 0 && (
+              <span className="text-xs text-gray-400">
+                {Math.round(speakerInfo.confidence * 100)}%
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <span className={`text-xs px-2 py-0.5 rounded-full ${
+              speakerInfo.emotion === 'estresse' ? 'bg-red-100 text-red-700' :
+              speakerInfo.emotion === 'tristeza' ? 'bg-blue-100 text-blue-700' :
+              speakerInfo.emotion === 'energia' ? 'bg-yellow-100 text-yellow-700' :
+              speakerInfo.emotion === 'calma' ? 'bg-green-100 text-green-700' :
+              'bg-gray-100 text-gray-600'
+            }`}>
+              {speakerInfo.emotion}
+            </span>
+            {speakerInfo.pitchHz > 0 && (
+              <span className="text-xs text-gray-400">{Math.round(speakerInfo.pitchHz)} Hz</span>
+            )}
+            <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden" title="Energia">
+              <div
+                className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                style={{ width: `${Math.round(speakerInfo.energy * 100)}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* SOS — DESATIVADO */}
 
       {/* Mode switch bar */}
