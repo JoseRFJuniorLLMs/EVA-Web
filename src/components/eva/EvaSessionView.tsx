@@ -48,9 +48,9 @@ interface EvaSessionViewProps {
 }
 
 export const EvaSessionView = memo(function EvaSessionView({
-  messages, subtitleText, speakerInfo, activeMode, isSpeaking, sessionStatus,
-  toolEvents, activeMusic, activeTimer,
-  waveCanvasRef, onSendText, onDismissEvent, onSwitchMode, t,
+  messages, subtitleText, speakerInfo: _speakerInfo, activeMode: _activeMode, isSpeaking, sessionStatus,
+  toolEvents: _toolEvents, activeMusic: _activeMusic, activeTimer: _activeTimer,
+  waveCanvasRef, onSendText, onDismissEvent: _onDismissEvent, onSwitchMode: _onSwitchMode, t,
 }: EvaSessionViewProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollThrottleRef = useRef(false);
@@ -66,15 +66,6 @@ export const EvaSessionView = memo(function EvaSessionView({
   }, [messages, subtitleText]);
 
   const isActive = sessionStatus === 'active' || sessionStatus === 'connecting';
-
-  // Memoize service card counts — avoid 8x .filter() on every re-render
-  const serviceCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const card of SERVICE_CARDS) {
-      counts[card.id] = toolEvents.filter(ev => (card.tools as readonly string[]).includes(ev.tool)).length;
-    }
-    return counts;
-  }, [toolEvents]);
 
   // === MODO DIAGNÓSTICO: só o básico para isolar problema de áudio ===
   // TODO: reativar componentes após confirmar que corte é do backend
