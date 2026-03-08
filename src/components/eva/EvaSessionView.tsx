@@ -76,72 +76,11 @@ export const EvaSessionView = memo(function EvaSessionView({
     return counts;
   }, [toolEvents]);
 
+  // === MODO DIAGNÓSTICO: só o básico para isolar problema de áudio ===
+  // TODO: reativar componentes após confirmar que corte é do backend
   return (
     <>
-      {/* Speaker recognition badge */}
-      {speakerInfo && isActive && (
-        <div className="flex items-center gap-3 px-4 py-2 border-b border-gray-100 bg-gray-50/50">
-          <div className="flex items-center gap-2">
-            <User className="w-3.5 h-3.5 text-gray-500" />
-            <span className="text-xs font-medium text-gray-700">
-              {speakerInfo.name}{speakerInfo.isNew ? ` ${t('eva.newSpeaker')}` : ''}
-            </span>
-            {speakerInfo.confidence > 0 && (
-              <span className="text-xs text-gray-400">
-                {Math.round(speakerInfo.confidence * 100)}%
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2 ml-auto">
-            <span className={`text-xs px-2 py-0.5 rounded-full ${
-              speakerInfo.emotion === 'estresse' ? 'bg-red-100 text-red-700' :
-              speakerInfo.emotion === 'tristeza' ? 'bg-blue-100 text-blue-700' :
-              speakerInfo.emotion === 'energia' ? 'bg-yellow-100 text-yellow-700' :
-              speakerInfo.emotion === 'calma' ? 'bg-green-100 text-green-700' :
-              'bg-gray-100 text-gray-600'
-            }`}>
-              {speakerInfo.emotion}
-            </span>
-            {speakerInfo.pitchHz > 0 && (
-              <span className="text-xs text-gray-400">{Math.round(speakerInfo.pitchHz)} Hz</span>
-            )}
-            <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden" title="Energia">
-              <div
-                className="h-full bg-emerald-500 rounded-full transition-all duration-300"
-                style={{ width: `${Math.round(speakerInfo.energy * 100)}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Mode switch bar */}
-      {sessionStatus === 'active' && (
-        <div className="flex items-center justify-center gap-2 px-4 py-2 border-b border-gray-100 bg-gray-50/50">
-          <span className="text-xs text-gray-400 mr-2">Modo:</span>
-          {([
-            { mode: 'voice' as SessionMode, icon: Mic, label: 'Voz', color: 'emerald' },
-            { mode: 'screen' as SessionMode, icon: Monitor, label: 'Tela', color: 'blue' },
-            { mode: 'camera' as SessionMode, icon: Camera, label: 'Câmera', color: 'indigo' },
-          ]).map(({ mode, icon: Icon, label, color }) => (
-            <button
-              key={mode}
-              onClick={() => onSwitchMode(mode)}
-              aria-label={`Modo ${label}`}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                activeMode === mode
-                  ? `bg-${color}-100 text-${color}-700 ring-1 ring-${color}-300`
-                  : 'bg-white text-gray-500 hover:bg-gray-100 border border-gray-200'
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Waveform bar */}
+      {/* Waveform bar — leve (2D canvas) */}
       {isActive && (
         <div className="px-4 pt-3 pb-2 border-b border-gray-100">
           <canvas
@@ -155,59 +94,11 @@ export const EvaSessionView = memo(function EvaSessionView({
         </div>
       )}
 
-      {/* Quick Actions + SOS */}
-      {isActive && <EvaQuickActions onAction={onSendText} />}
-      {isActive && <EvaSOS onSOS={() => onSendText('emergência')} />}
-
-      {/* Content area */}
+      {/* Content area — só subtitle e mensagens, sem cards/tools/speaker */}
       <div className="flex-1 overflow-y-auto py-6">
-        {/* Service dashboard cards */}
-        {isActive && (
-          <div className="px-2 py-3">
-            <div className="grid grid-cols-4 gap-2">
-              {SERVICE_CARDS.map(card => {
-                const colors = COLOR_MAP[card.color] || COLOR_MAP.blue;
-                const Icon = card.icon;
-                const count = serviceCounts[card.id] || 0;
-                const hasData = count > 0;
-                return (
-                  <div
-                    key={card.id}
-                    className={`relative flex flex-col items-center gap-1 px-2 py-3 rounded-xl border transition-all ${
-                      hasData
-                        ? `${colors.activeBg} ${colors.border} shadow-sm`
-                        : 'bg-gray-50 border-gray-200 opacity-60'
-                    }`}
-                  >
-                    <Icon className={`w-5 h-5 ${hasData ? colors.icon : 'text-gray-400'}`} />
-                    <span className={`text-[10px] font-semibold ${hasData ? colors.text : 'text-gray-500'}`}>{card.label}</span>
-                    {hasData && (
-                      <span className={`absolute -top-1 -right-1 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center text-white ${
-                        card.color === 'red' ? 'bg-red-500' :
-                        card.color === 'blue' ? 'bg-blue-500' :
-                        card.color === 'green' ? 'bg-green-500' :
-                        card.color === 'indigo' ? 'bg-indigo-500' :
-                        card.color === 'emerald' ? 'bg-emerald-500' :
-                        card.color === 'purple' ? 'bg-purple-500' :
-                        'bg-amber-500'
-                      }`}>
-                        {count}
-                      </span>
-                    )}
-                    {!hasData && (
-                      <span className="text-[9px] text-gray-400">—</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Transcription messages + Tool cards */}
         {isActive && (
           <div className="space-y-3 px-2">
-            {messages.length === 0 && !subtitleText && toolEvents.length === 0 && sessionStatus === 'active' && (
+            {messages.length === 0 && !subtitleText && sessionStatus === 'active' && (
               <div className="text-center py-8">
                 <p className="text-gray-400 text-sm">{t('eva.startTalking')}</p>
               </div>
@@ -225,19 +116,10 @@ export const EvaSessionView = memo(function EvaSessionView({
               </div>
             ))}
 
-            {toolEvents.map(ev => (
-              <div key={ev.id} className="flex justify-start">
-                <EvaToolCard event={ev} />
-              </div>
-            ))}
-
             {subtitleText && (
               <div className="flex justify-start">
-                <div className={`max-w-[75%] px-4 py-2 rounded-2xl rounded-bl-sm text-sm leading-relaxed ${
-                  activeMode === 'voice' ? 'bg-emerald-50 text-emerald-900 border border-emerald-100' : 'bg-blue-50 text-blue-900 border border-blue-100'
-                }`} aria-live="polite">
+                <div className="max-w-[75%] px-4 py-2 rounded-2xl rounded-bl-sm text-sm leading-relaxed bg-emerald-50 text-emerald-900 border border-emerald-100" aria-live="polite">
                   {subtitleText}
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse ml-1 align-middle" />
                 </div>
               </div>
             )}
@@ -246,14 +128,6 @@ export const EvaSessionView = memo(function EvaSessionView({
           </div>
         )}
       </div>
-
-      {/* Persistent players */}
-      {activeMusic && isActive && (
-        <MusicPlayer event={activeMusic} onClose={() => onDismissEvent(activeMusic.id)} />
-      )}
-      {activeTimer && isActive && (
-        <TimerPlayer event={activeTimer} onClose={() => onDismissEvent(activeTimer.id)} />
-      )}
 
       {/* Text input bar */}
       {isActive && (
