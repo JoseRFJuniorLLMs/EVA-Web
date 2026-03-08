@@ -1,34 +1,7 @@
-import { useRef, useEffect, useMemo, memo } from 'react';
-import { Mic, Monitor, Camera, User, Mail, Calendar, PlayCircle, HardDrive, Search, MapPin, MessageSquare, Bell } from 'lucide-react';
+import { useRef, useEffect, memo } from 'react';
 import { EvaTextInput } from './EvaTextInput';
-import { EvaToolCard } from './EvaToolCard';
-import { EvaQuickActions } from './EvaQuickActions';
-import { EvaSOS } from './EvaSOS';
-import { MusicPlayer } from './players/MusicPlayer';
-import { TimerPlayer } from './players/TimerPlayer';
 import type { SessionMode, SessionStatus, ChatMessage, SpeakerInfo } from '../../types/eva-session';
 import type { ToolEvent } from '../../types/eva-tools';
-
-const SERVICE_CARDS = [
-  { id: 'email', icon: Mail, label: 'Gmail', color: 'red', tools: ['send_email', 'new_email'] },
-  { id: 'calendar', icon: Calendar, label: 'Calendar', color: 'blue', tools: ['manage_calendar_event'] },
-  { id: 'video', icon: PlayCircle, label: 'YouTube', color: 'red', tools: ['search_videos', 'play_video'] },
-  { id: 'drive', icon: HardDrive, label: 'Drive', color: 'green', tools: ['save_to_drive'] },
-  { id: 'search', icon: Search, label: 'Web Search', color: 'indigo', tools: ['web_search'] },
-  { id: 'maps', icon: MapPin, label: 'Maps', color: 'emerald', tools: ['find_nearby_places'] },
-  { id: 'messaging', icon: MessageSquare, label: 'Messages', color: 'purple', tools: ['send_whatsapp', 'send_telegram'] },
-  { id: 'reminders', icon: Bell, label: 'Reminders', color: 'amber', tools: ['schedule_task', 'list_scheduled_tasks'] },
-] as const;
-
-const COLOR_MAP: Record<string, { bg: string; border: string; text: string; icon: string; activeBg: string }> = {
-  red:     { bg: 'bg-red-50',     border: 'border-red-200',     text: 'text-red-700',     icon: 'text-red-500',     activeBg: 'bg-red-100' },
-  blue:    { bg: 'bg-blue-50',    border: 'border-blue-200',    text: 'text-blue-700',    icon: 'text-blue-500',    activeBg: 'bg-blue-100' },
-  green:   { bg: 'bg-green-50',   border: 'border-green-200',   text: 'text-green-700',   icon: 'text-green-500',   activeBg: 'bg-green-100' },
-  indigo:  { bg: 'bg-indigo-50',  border: 'border-indigo-200',  text: 'text-indigo-700',  icon: 'text-indigo-500',  activeBg: 'bg-indigo-100' },
-  emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', icon: 'text-emerald-500', activeBg: 'bg-emerald-100' },
-  purple:  { bg: 'bg-purple-50',  border: 'border-purple-200',  text: 'text-purple-700',  icon: 'text-purple-500',  activeBg: 'bg-purple-100' },
-  amber:   { bg: 'bg-amber-50',   border: 'border-amber-200',   text: 'text-amber-700',   icon: 'text-amber-500',   activeBg: 'bg-amber-100' },
-};
 
 interface EvaSessionViewProps {
   messages: ChatMessage[];
