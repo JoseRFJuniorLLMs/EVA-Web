@@ -194,14 +194,29 @@ export function useEvaSession(cpf: string, t: (key: string) => string) {
               if (msg.data) await audioEngine.playAudioChunk(msg.data);
               break;
             case 'speaker':
-              setSpeakerInfo({
-                name: msg.name || t('common.unknown'),
-                confidence: msg.confidence || 0,
-                emotion: msg.emotion || 'neutro',
-                pitchHz: msg.pitch_hz || 0,
-                energy: msg.energy || 0,
-                stressLevel: msg.stress_level || 0,
-                isNew: msg.is_new || false,
+              // Only update state if values actually changed — avoids re-rendering
+              // the entire EvaSessionView tree on every speaker analysis message
+              setSpeakerInfo(prev => {
+                const name = msg.name || t('common.unknown');
+                const emotion = msg.emotion || 'neutro';
+                const energy = msg.energy || 0;
+                const pitchHz = msg.pitch_hz || 0;
+                if (prev &&
+                    prev.name === name &&
+                    prev.emotion === emotion &&
+                    Math.abs(prev.energy - energy) < 0.05 &&
+                    Math.abs(prev.pitchHz - pitchHz) < 5) {
+                  return prev; // same ref = no re-render
+                }
+                return {
+                  name,
+                  confidence: msg.confidence || 0,
+                  emotion,
+                  pitchHz,
+                  energy,
+                  stressLevel: msg.stress_level || 0,
+                  isNew: msg.is_new || false,
+                };
               });
               break;
             case 'tool_event':

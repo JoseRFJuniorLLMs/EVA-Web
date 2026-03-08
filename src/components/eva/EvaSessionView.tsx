@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useMemo, memo } from 'react';
 import { Mic, Monitor, Camera, User, Mail, Calendar, PlayCircle, HardDrive, Search, MapPin, MessageSquare, Bell } from 'lucide-react';
 import { EvaTextInput } from './EvaTextInput';
 import { EvaToolCard } from './EvaToolCard';
@@ -47,18 +47,34 @@ interface EvaSessionViewProps {
   t: (key: string) => string;
 }
 
-export function EvaSessionView({
+export const EvaSessionView = memo(function EvaSessionView({
   messages, subtitleText, speakerInfo, activeMode, isSpeaking, sessionStatus,
   toolEvents, activeMusic, activeTimer,
   waveCanvasRef, onSendText, onDismissEvent, onSwitchMode, t,
 }: EvaSessionViewProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollThrottleRef = useRef(false);
 
+  // Throttled scroll — max 1x per 200ms to avoid layout thrashing during rapid audio/text
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollThrottleRef.current) return;
+    scrollThrottleRef.current = true;
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => { scrollThrottleRef.current = false; }, 200);
+    });
   }, [messages, subtitleText]);
 
   const isActive = sessionStatus === 'active' || sessionStatus === 'connecting';
+
+  // Memoize service card counts — avoid 8x .filter() on every re-render
+  const serviceCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const card of SERVICE_CARDS) {
+      counts[card.id] = toolEvents.filter(ev => (card.tools as readonly string[]).includes(ev.tool)).length;
+    }
+    return counts;
+  }, [toolEvents]);
 
   return (
     <>
@@ -152,7 +168,7 @@ export function EvaSessionView({
               {SERVICE_CARDS.map(card => {
                 const colors = COLOR_MAP[card.color] || COLOR_MAP.blue;
                 const Icon = card.icon;
-                const count = toolEvents.filter(ev => (card.tools as readonly string[]).includes(ev.tool)).length;
+                const count = serviceCounts[card.id] || 0;
                 const hasData = count > 0;
                 return (
                   <div
@@ -249,4 +265,4 @@ export function EvaSessionView({
       )}
     </>
   );
-}
+});

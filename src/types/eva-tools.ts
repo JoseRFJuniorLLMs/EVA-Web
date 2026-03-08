@@ -146,7 +146,7 @@ export const TOOL_CATEGORY_MAP: Record<string, ToolCategory> = {
   query_nietzsche: 'database',
   query_nietzsche_graph: 'database',
   query_nietzsche_vector: 'database',
-  query_postgresql: 'database',
+  query_NietzscheDB: 'database',
   run_sql_select: 'database',
   query_my_database: 'database',
   list_my_collections: 'database',

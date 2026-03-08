@@ -1,10 +1,11 @@
+import { memo } from 'react';
 import { AlertTriangle } from 'lucide-react';
 
 interface EvaSosProps {
   onSOS: () => void;
 }
 
-export function EvaSOS({ onSOS }: EvaSosProps) {
+export const EvaSOS = memo(function EvaSOS({ onSOS }: EvaSosProps) {
   return (
     <button
       onClick={onSOS}
@@ -14,4 +15,4 @@ export function EvaSOS({ onSOS }: EvaSosProps) {
       <AlertTriangle className="w-6 h-6" />
     </button>
   );
-}
+});

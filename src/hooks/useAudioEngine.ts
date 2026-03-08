@@ -127,7 +127,8 @@ export function useAudioEngine() {
   }, []);
 
   const playAudioChunk = useCallback(async (base64Data: string) => {
-    setIsSpeaking(true);
+    // Only trigger React state update on transition from false→true
+    if (!isSpeakingRef.current) setIsSpeaking(true);
     const ctx = outputAudioCtxRef.current;
     if (!ctx) return;
     if (ctx.state === 'suspended') await ctx.resume();

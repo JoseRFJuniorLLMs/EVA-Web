@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import {
   Search, Mail, MessageCircle, Music, Play, Calendar, CheckSquare, Bell,
   MapPin, Navigation, Flower2, Wind, HelpCircle, Newspaper, Pill, Droplets,
@@ -36,7 +36,7 @@ interface EvaQuickActionsProps {
   collapsed?: boolean;
 }
 
-export function EvaQuickActions({ onAction, collapsed: initialCollapsed = true }: EvaQuickActionsProps) {
+export const EvaQuickActions = memo(function EvaQuickActions({ onAction, collapsed: initialCollapsed = true }: EvaQuickActionsProps) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
 
   if (collapsed) {
@@ -81,4 +81,4 @@ export function EvaQuickActions({ onAction, collapsed: initialCollapsed = true }
       </div>
     </div>
   );
-}
+});

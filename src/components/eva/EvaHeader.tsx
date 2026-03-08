@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Sparkles, LogOut, X } from 'lucide-react';
 import type { SessionMode, SessionStatus, GoogleStatus } from '../../types/eva-session';
 
@@ -12,7 +13,7 @@ interface EvaHeaderProps {
   t: (key: string) => string;
 }
 
-export function EvaHeader({ cpf, googleStatus, sessionStatus, activeMode, isSpeaking, onStop, onLogout, t }: EvaHeaderProps) {
+export const EvaHeader = memo(function EvaHeader({ cpf, googleStatus, sessionStatus, activeMode, isSpeaking, onStop, onLogout, t }: EvaHeaderProps) {
   const isActive = sessionStatus === 'active' || sessionStatus === 'connecting';
   const modeLabel = activeMode === 'voice' ? t('eva.audio') : activeMode === 'screen' ? t('eva.screen') : activeMode === 'camera' ? t('eva.camera') : '';
 
@@ -59,4 +60,4 @@ export function EvaHeader({ cpf, googleStatus, sessionStatus, activeMode, isSpea
       </div>
     </div>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { useState, useRef, KeyboardEvent } from 'react';
+import { useState, useRef, memo, KeyboardEvent } from 'react';
 import { Send } from 'lucide-react';
 
 interface EvaTextInputProps {
@@ -7,7 +7,7 @@ interface EvaTextInputProps {
   placeholder?: string;
 }
 
-export function EvaTextInput({ onSend, disabled, placeholder = 'Digite ou fale...' }: EvaTextInputProps) {
+export const EvaTextInput = memo(function EvaTextInput({ onSend, disabled, placeholder = 'Digite ou fale...' }: EvaTextInputProps) {
   const [text, setText] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -47,4 +47,4 @@ export function EvaTextInput({ onSend, disabled, placeholder = 'Digite ou fale..
       </button>
     </div>
   );
-}
+});
