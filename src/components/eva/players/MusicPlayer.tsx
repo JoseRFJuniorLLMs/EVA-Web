@@ -1,13 +1,15 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { Music, Pause, Play, X, Radio } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
 
 interface MusicPlayerProps {
   event: ToolEvent;
   onClose: () => void;
+  /** When true, duck music volume to avoid competing with EVA's voice */
+  isSpeaking?: boolean;
 }
 
-export function MusicPlayer({ event, onClose }: MusicPlayerProps) {
+export const MusicPlayer = memo(function MusicPlayer({ event, onClose, isSpeaking }: MusicPlayerProps) {
   const d = event.toolData as Record<string, unknown>;
   const title = (d.title as string) || (d.name as string) || (d.track as string) || 'Música';
   const artist = (d.artist as string) || '';
@@ -24,6 +26,25 @@ export function MusicPlayer({ event, onClose }: MusicPlayerProps) {
     if (!el || !url) return;
     el.play().catch(() => setIsPlaying(false));
   }, [url]);
+
+  // Duck music volume when EVA is speaking to prevent audio competition
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    el.volume = isSpeaking ? 0.08 : 1.0;
+  }, [isSpeaking]);
+
+  // Cleanup audio element on unmount to release audio device
+  useEffect(() => {
+    return () => {
+      const el = audioRef.current;
+      if (el) {
+        el.pause();
+        el.removeAttribute('src');
+        el.load(); // release audio device
+      }
+    };
+  }, []);
 
   const togglePlay = () => {
     const el = audioRef.current;
@@ -65,4 +86,4 @@ export function MusicPlayer({ event, onClose }: MusicPlayerProps) {
       </button>
     </div>
   );
-}
+});

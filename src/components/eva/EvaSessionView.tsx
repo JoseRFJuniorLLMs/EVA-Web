@@ -249,7 +249,7 @@ export const EvaSessionView = memo(function EvaSessionView({
 
       {/* Persistent players */}
       {activeMusic && isActive && (
-        <MusicPlayer event={activeMusic} onClose={() => onDismissEvent(activeMusic.id)} />
+        <MusicPlayer event={activeMusic} onClose={() => onDismissEvent(activeMusic.id)} isSpeaking={isSpeaking} />
       )}
       {activeTimer && isActive && (
         <TimerPlayer event={activeTimer} onClose={() => onDismissEvent(activeTimer.id)} />

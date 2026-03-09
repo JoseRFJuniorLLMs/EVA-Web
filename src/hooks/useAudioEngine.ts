@@ -2,6 +2,8 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { createBlob, decode, decodeAudioData } from '../utils/audioUtils';
 
 const MAX_SOURCES = 64;
+/** Draw waveform at ~15fps instead of 60fps to avoid starving the audio thread */
+const WAVEFORM_INTERVAL_MS = 66;
 
 export function useAudioEngine() {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -17,6 +19,7 @@ export function useAudioEngine() {
   const nextStartTimeRef = useRef(0);
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
   const animFrameRef = useRef<number | null>(null);
+  const lastDrawTimeRef = useRef(0);
   const waveCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // Sync state -> ref for requestAnimationFrame
@@ -24,6 +27,11 @@ export function useAudioEngine() {
 
   const drawWaveform = useCallback(() => {
     animFrameRef.current = requestAnimationFrame(drawWaveform);
+
+    // Throttle canvas draws to ~15fps — frees main thread for audio decoding
+    const now = performance.now();
+    if (now - lastDrawTimeRef.current < WAVEFORM_INTERVAL_MS) return;
+    lastDrawTimeRef.current = now;
 
     const canvas = waveCanvasRef.current;
     if (!canvas || canvas.offsetWidth === 0) return;
@@ -118,7 +126,9 @@ export function useAudioEngine() {
     workletNode.port.onmessage = (e: MessageEvent) => {
       try {
         onAudioBlob(createBlob(e.data));
-      } catch { /* ignore */ }
+      } catch (err) {
+        console.warn('[AudioEngine] mic capture error:', err);
+      }
     };
     if (inputAnalyserRef.current) source.connect(inputAnalyserRef.current);
     source.connect(workletNode);
@@ -147,7 +157,37 @@ export function useAudioEngine() {
         const oldest = sourcesRef.current.values().next().value;
         if (oldest) { try { oldest.stop(); } catch { /* */ } sourcesRef.current.delete(oldest); }
       }
-    } catch { /* ignore decode errors */ }
+    } catch (err) {
+      console.warn('[AudioEngine] audio decode error (chunk dropped):', err);
+    }
+  }, []);
+
+  /** Play a short connection beep using the EXISTING output AudioContext (no new context) */
+  const playBeep = useCallback(() => {
+    const ctx = outputAudioCtxRef.current;
+    if (!ctx || ctx.state === 'closed') return;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 523;
+      osc.type = 'sine';
+      gain.gain.value = 0.12;
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.2);
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.frequency.value = 784;
+      osc2.type = 'sine';
+      gain2.gain.value = 0.12;
+      gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc2.start(ctx.currentTime + 0.12);
+      osc2.stop(ctx.currentTime + 0.4);
+    } catch { /* audio not available */ }
   }, []);
 
   const handleInterrupted = useCallback(() => {
@@ -165,6 +205,10 @@ export function useAudioEngine() {
     if (workletNodeRef.current) { workletNodeRef.current.disconnect(); workletNodeRef.current.port.postMessage('STOP'); workletNodeRef.current = null; }
     sourcesRef.current.forEach(s => { try { s.stop(); } catch { /* */ } });
     sourcesRef.current.clear();
+    if (inputAudioCtxRef.current) { inputAudioCtxRef.current.close().catch(() => {}); inputAudioCtxRef.current = null; }
+    if (outputAudioCtxRef.current) { outputAudioCtxRef.current.close().catch(() => {}); outputAudioCtxRef.current = null; }
+    outputNodeRef.current = null;
+    nextStartTimeRef.current = 0;
     setIsSpeaking(false);
   }, []);
 
@@ -175,6 +219,7 @@ export function useAudioEngine() {
     initAudio,
     setupMicCapture,
     playAudioChunk,
+    playBeep,
     handleInterrupted,
     cleanupAudio,
   };

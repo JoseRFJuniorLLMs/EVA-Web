@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { Timer, Pause, Play, X } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
 
@@ -7,7 +7,7 @@ interface TimerPlayerProps {
   onClose: () => void;
 }
 
-export function TimerPlayer({ event, onClose }: TimerPlayerProps) {
+export const TimerPlayer = memo(function TimerPlayer({ event, onClose }: TimerPlayerProps) {
   const d = event.toolData as Record<string, unknown>;
   const duration = ((d.duration as number) || 25) * 60; // minutes to seconds
   const label = (d.label as string) || 'Pomodoro';
@@ -56,4 +56,4 @@ export function TimerPlayer({ event, onClose }: TimerPlayerProps) {
       </button>
     </div>
   );
-}
+});

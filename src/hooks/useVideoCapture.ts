@@ -8,6 +8,8 @@ export function useVideoCapture() {
   const frameIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const captureAndSendFrame = useCallback((sendFrame: (base64: string) => void) => {
+    // Skip frame capture when tab is in background — frees CPU for audio
+    if (document.hidden) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas) return;
