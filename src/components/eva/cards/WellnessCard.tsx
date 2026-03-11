@@ -2,6 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { Flower2, Wind, Dumbbell } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
 
+const WELLNESS_COLORS: Record<string, { border: string; bg: string; borderB: string; icon: string; text: string }> = {
+  violet:  { border: 'border-violet-100',  bg: 'bg-violet-50',  borderB: 'border-violet-100',  icon: 'text-violet-600',  text: 'text-violet-800' },
+  cyan:    { border: 'border-cyan-100',    bg: 'bg-cyan-50',    borderB: 'border-cyan-100',    icon: 'text-cyan-600',    text: 'text-cyan-800' },
+  blue:    { border: 'border-blue-100',    bg: 'bg-blue-50',    borderB: 'border-blue-100',    icon: 'text-blue-600',    text: 'text-blue-800' },
+  emerald: { border: 'border-emerald-100', bg: 'bg-emerald-50', borderB: 'border-emerald-100', icon: 'text-emerald-600', text: 'text-emerald-800' },
+};
+
 const TOOL_META: Record<string, { icon: typeof Wind; name: string; color: string }> = {
   guided_meditation: { icon: Flower2, name: 'Meditação Guiada', color: 'violet' },
   breathing_exercises: { icon: Wind, name: 'Respiração', color: 'cyan' },
@@ -42,11 +49,13 @@ export function WellnessCard({ event }: { event: ToolEvent }) {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [isBreathing, pattern]);
 
+  const colors = WELLNESS_COLORS[meta.color] || WELLNESS_COLORS.cyan;
+
   return (
-    <div className={`rounded-xl border bg-white overflow-hidden border-${meta.color}-100`}>
-      <div className={`flex items-center gap-2 px-3 py-2 bg-${meta.color}-50 border-b border-${meta.color}-100`}>
-        <Icon className={`w-4 h-4 text-${meta.color}-600`} />
-        <span className={`text-xs font-semibold text-${meta.color}-800`}>{meta.name}</span>
+    <div className={`rounded-xl border bg-white overflow-hidden ${colors.border}`}>
+      <div className={`flex items-center gap-2 px-3 py-2 ${colors.bg} border-b ${colors.borderB}`}>
+        <Icon className={`w-4 h-4 ${colors.icon}`} />
+        <span className={`text-xs font-semibold ${colors.text}`}>{meta.name}</span>
         {duration > 0 && <span className="text-xs text-gray-500 ml-auto">{duration}min</span>}
       </div>
       <div className="px-3 py-4">

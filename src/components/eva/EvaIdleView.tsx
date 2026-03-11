@@ -48,7 +48,7 @@ export function EvaIdleView({ isAuthenticated, showVideoOptions, onStartSession,
               <span className="text-sm font-semibold text-gray-800">
                 {capLoading
                   ? t('eva.resourcesLoading')
-                  : `${capabilities.length || 33} ${t('eva.resources')}`}
+                  : `${capabilities.length} ${t('eva.resources')}`}
               </span>
             </div>
             {showCaps

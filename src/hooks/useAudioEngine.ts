@@ -21,6 +21,7 @@ export function useAudioEngine() {
   const animFrameRef = useRef<number | null>(null);
   const lastDrawTimeRef = useRef(0);
   const waveCanvasRef = useRef<HTMLCanvasElement>(null);
+  const waveDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
 
   // Sync state -> ref for requestAnimationFrame
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
@@ -55,7 +56,10 @@ export function useAudioEngine() {
 
     if (analyser) {
       const len = analyser.frequencyBinCount;
-      const data = new Uint8Array(len);
+      if (!waveDataRef.current || waveDataRef.current.length !== len) {
+        waveDataRef.current = new Uint8Array(len);
+      }
+      const data = waveDataRef.current;
       analyser.getByteTimeDomainData(data);
 
       ctx2d.beginPath();
@@ -81,6 +85,11 @@ export function useAudioEngine() {
   }, []);
 
   const initAudio = useCallback(async (): Promise<MediaStream> => {
+    // Guard: close any existing contexts to prevent AudioContext leak
+    if (inputAudioCtxRef.current) { inputAudioCtxRef.current.close().catch(() => {}); }
+    if (outputAudioCtxRef.current) { outputAudioCtxRef.current.close().catch(() => {}); }
+    if (animFrameRef.current) { cancelAnimationFrame(animFrameRef.current); }
+
     const inputCtx = new AudioContext({ sampleRate: 16000 });
     const outputCtx = new AudioContext({ sampleRate: 24000 });
     inputAudioCtxRef.current = inputCtx;
@@ -120,7 +129,8 @@ export function useAudioEngine() {
     micStream: MediaStream,
     onAudioBlob: (blob: { data: string; mimeType: string }) => void
   ) => {
-    const audioCtx = inputAudioCtxRef.current!;
+    const audioCtx = inputAudioCtxRef.current;
+    if (!audioCtx) return;
     const source = audioCtx.createMediaStreamSource(micStream);
     const workletNode = new AudioWorkletNode(audioCtx, 'audio-processor');
     workletNode.port.onmessage = (e: MessageEvent) => {
@@ -147,7 +157,9 @@ export function useAudioEngine() {
       const audioBuffer = await decodeAudioData(decode(base64Data), ctx, 24000, 1);
       const source = ctx.createBufferSource();
       source.buffer = audioBuffer;
-      source.connect(outputNodeRef.current!);
+      const outNode = outputNodeRef.current;
+      if (!outNode) return;
+      source.connect(outNode);
       source.start(nextStartTimeRef.current);
       nextStartTimeRef.current += audioBuffer.duration;
       sourcesRef.current.add(source);

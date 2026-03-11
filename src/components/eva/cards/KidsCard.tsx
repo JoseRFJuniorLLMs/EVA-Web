@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Star, Rocket, BookOpen, HelpCircle, Trophy } from 'lucide-react';
 import type { ToolEvent } from '../../../types/eva-tools';
 
@@ -10,6 +11,9 @@ export function KidsCard({ event }: { event: ToolEvent }) {
   const stats = d.stats as Record<string, number>;
   const xp = d.xp as number;
   const msg = (d.message as string) || '';
+
+  const correctAnswer = (d.answer as string) || '';
+  const [quizSelected, setQuizSelected] = useState<string | null>(null);
 
   const isMission = event.tool.includes('mission');
   const isStory = event.tool === 'kids_story';
@@ -36,7 +40,7 @@ export function KidsCard({ event }: { event: ToolEvent }) {
               <div key={i} className="flex items-center gap-2 p-2 bg-white rounded-lg border border-purple-100">
                 <span className="text-lg">{m.done ? '✅' : '🎯'}</span>
                 <span className={`text-sm flex-1 ${m.done ? 'text-gray-400 line-through' : 'font-medium text-gray-800'}`}>{m.title}</span>
-                {m.xp && <span className="text-xs text-yellow-600">+{m.xp} XP</span>}
+                {m.xp != null && m.xp > 0 && <span className="text-xs text-yellow-600">+{m.xp} XP</span>}
               </div>
             ))}
           </div>
@@ -50,11 +54,23 @@ export function KidsCard({ event }: { event: ToolEvent }) {
           <div>
             <p className="text-sm font-medium text-gray-800 mb-3">{question}</p>
             <div className="grid grid-cols-2 gap-2">
-              {options.map((opt, i) => (
-                <button key={i} className="px-3 py-2 text-sm bg-white rounded-lg border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50 transition-colors cursor-pointer font-medium">
-                  {opt}
-                </button>
-              ))}
+              {options.map((opt, i) => {
+                let cls = 'bg-white border-purple-200 hover:border-purple-400 hover:bg-purple-50';
+                if (quizSelected !== null) {
+                  if (correctAnswer && opt === correctAnswer) cls = 'bg-green-100 border-green-400 text-green-800';
+                  else if (opt === quizSelected && opt !== correctAnswer) cls = 'bg-red-100 border-red-400 text-red-800';
+                }
+                return (
+                  <button
+                    key={i}
+                    onClick={() => { if (!quizSelected) setQuizSelected(opt); }}
+                    disabled={quizSelected !== null}
+                    className={`px-3 py-2 text-sm rounded-lg border-2 transition-colors cursor-pointer disabled:cursor-default font-medium ${cls}`}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}

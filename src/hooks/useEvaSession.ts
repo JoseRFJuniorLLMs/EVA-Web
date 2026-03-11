@@ -29,6 +29,8 @@ export function useEvaSession(cpf: string, t: (key: string) => string) {
 
   const wsRef = useRef<WebSocket | null>(null);
   const activeRef = useRef(false);
+  const startingRef = useRef(false);
+  const modeRef = useRef<SessionMode | null>(null);
   const reconnectCountRef = useRef(0);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -66,6 +68,7 @@ export function useEvaSession(cpf: string, t: (key: string) => string) {
 
   const stopSession = useCallback(() => {
     cleanup();
+    startingRef.current = false;
     reconnectCountRef.current = 0;
     setActiveMode(null);
     setSessionStatus('idle');
@@ -86,6 +89,11 @@ export function useEvaSession(cpf: string, t: (key: string) => string) {
   }, []);
 
   const startSession = useCallback(async (mode: SessionMode) => {
+    // Guard: prevent double-start
+    if (startingRef.current) return;
+    startingRef.current = true;
+    modeRef.current = mode;
+
     setActiveMode(mode);
     setSessionStatus('connecting');
     setShowVideoOptions(false);
@@ -126,6 +134,7 @@ export function useEvaSession(cpf: string, t: (key: string) => string) {
             case 'status':
               if (msg.text === 'ready') {
                 activeRef.current = true;
+                startingRef.current = false;
                 reconnectCountRef.current = 0;
                 setSessionStatus('active');
                 audioEngine.playBeep();
@@ -222,8 +231,12 @@ export function useEvaSession(cpf: string, t: (key: string) => string) {
               duration: delay,
             });
             reconnectTimerRef.current = setTimeout(() => {
-              cleanup();
-              startSession(mode);
+              // Clean resources but keep activeRef true for reconnect
+              audioEngine.cleanupAudio();
+              videoCapture.stopVideoCapture();
+              if (wsRef.current) { wsRef.current.close(); wsRef.current = null; }
+              startingRef.current = false;
+              startSession(modeRef.current || 'voice');
             }, delay);
           } else {
             cleanup();
@@ -243,6 +256,7 @@ export function useEvaSession(cpf: string, t: (key: string) => string) {
 
     } catch (err) {
       console.error('EvaSession: start failed:', err);
+      startingRef.current = false;
       cleanup();
       setActiveMode(null);
       setSessionStatus('idle');

@@ -66,7 +66,7 @@ export const EvaToolCard = memo(function EvaToolCard({ event }: { event: ToolEve
 
   const Card = CATEGORY_CARD[category] || GenericToolCard;
   return (
-    <div className="max-w-[85%] animate-in fade-in slide-in-from-left-2 duration-300">
+    <div className="max-w-[85%]" style={{ animation: 'fadeSlideIn 300ms ease-out' }}>
       <Card event={event} />
     </div>
   );

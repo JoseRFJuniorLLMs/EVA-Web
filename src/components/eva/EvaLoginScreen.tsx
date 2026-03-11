@@ -32,7 +32,7 @@ export function EvaLoginScreen({ onAuthenticated }: EvaLoginScreenProps) {
   // See git history for full Google OAuth flow (handleConnectGoogle, useEffect callback detection, Step 2 UI)
 
   return (
-    <div className="flex flex-col items-center justify-center h-[calc(100vh-7rem)]">
+    <div className="flex flex-col items-center justify-center h-dvh p-4">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg">

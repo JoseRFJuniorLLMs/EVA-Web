@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { ToolEvent, getToolCategory } from '../types/eva-tools';
 
 let eventCounter = 0;
+const MAX_TOOL_EVENTS = 100;
 
 export function useToolEvents() {
   const [toolEvents, setToolEvents] = useState<ToolEvent[]>([]);
@@ -25,7 +26,10 @@ export function useToolEvents() {
     if (category === 'timer') setActiveTimer(event);
     if (category === 'emergency') setEmergencyActive(true);
 
-    setToolEvents(prev => [...prev, event]);
+    setToolEvents(prev => {
+      const next = [...prev, event];
+      return next.length > MAX_TOOL_EVENTS ? next.slice(-MAX_TOOL_EVENTS) : next;
+    });
     return event;
   }, []);
 
@@ -38,6 +42,8 @@ export function useToolEvents() {
 
   const dismissEvent = useCallback((id: string) => {
     setToolEvents(prev => prev.filter(e => e.id !== id));
+    setActiveMusic(prev => prev?.id === id ? null : prev);
+    setActiveTimer(prev => prev?.id === id ? null : prev);
   }, []);
 
   return {

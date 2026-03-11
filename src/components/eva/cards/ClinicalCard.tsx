@@ -28,6 +28,16 @@ export function ClinicalCard({ event }: { event: ToolEvent }) {
   const msg = (d.message as string) || '';
   const isCSSRS = event.tool === 'apply_cssrs';
   const [currentQ, setCurrentQ] = useState(0);
+  const [answers, setAnswers] = useState<number[]>([]);
+  const completed = questions.length > 0 && answers.length >= questions.length;
+  const totalScore = answers.reduce((a, b) => a + b, 0);
+
+  const handleAnswer = (optionIndex: number) => {
+    setAnswers(prev => [...prev, optionIndex]);
+    if (currentQ < questions.length - 1) {
+      setCurrentQ(q => q + 1);
+    }
+  };
 
   return (
     <div className={`rounded-xl border overflow-hidden ${isCSSRS ? 'border-red-200' : 'border-indigo-100'}`}>
@@ -44,19 +54,27 @@ export function ClinicalCard({ event }: { event: ToolEvent }) {
             {severity && <span className="text-sm font-medium text-gray-700">{severity}</span>}
           </div>
         )}
-        {questions.length > 0 && (
+        {questions.length > 0 && !completed && (
           <div>
             <p className="text-xs text-gray-400 mb-1">Pergunta {currentQ + 1}/{questions.length}</p>
             <p className="text-sm font-medium text-gray-800 mb-2">{questions[currentQ]?.text}</p>
             {questions[currentQ]?.options?.map((opt, i) => (
               <button
                 key={i}
-                onClick={() => setCurrentQ(q => Math.min(q + 1, questions.length - 1))}
+                onClick={() => handleAnswer(i)}
                 className="block w-full text-left px-3 py-2 text-sm bg-gray-50 rounded-lg border border-gray-200 hover:bg-indigo-50 hover:border-indigo-200 mb-1 transition-colors cursor-pointer"
               >
                 {opt}
               </button>
             ))}
+          </div>
+        )}
+        {completed && score === undefined && (
+          <div className="flex items-center gap-3">
+            <div className={`text-2xl font-bold px-3 py-1 rounded-lg ${scoreColor(totalScore, maxScore)}`}>
+              {totalScore}/{maxScore}
+            </div>
+            <span className="text-sm text-gray-500">Avaliação concluída</span>
           </div>
         )}
         {!questions.length && !score && msg && <p className="text-sm text-gray-600">{msg}</p>}

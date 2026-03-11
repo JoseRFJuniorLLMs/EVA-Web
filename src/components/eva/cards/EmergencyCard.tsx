@@ -18,7 +18,7 @@ export function EmergencyCard({ event }: { event: ToolEvent }) {
   const isCall = event.tool.includes('call_');
 
   return (
-    <div className="rounded-xl border-2 border-red-300 bg-red-50 overflow-hidden shadow-lg animate-pulse">
+    <div className="rounded-xl border-2 border-red-300 bg-red-50 overflow-hidden shadow-lg">
       <div className="flex items-center gap-2 px-4 py-3 bg-red-600">
         <AlertTriangle className="w-5 h-5 text-white" />
         <span className="text-sm font-bold text-white">{label}</span>
@@ -27,7 +27,7 @@ export function EmergencyCard({ event }: { event: ToolEvent }) {
       <div className="px-4 py-4">
         {isCall && (
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center animate-bounce">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
               <Phone className="w-6 h-6 text-red-600" />
             </div>
             <div>

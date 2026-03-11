@@ -3,10 +3,9 @@
   "configurations": [
     {
       "name": "eva-web-dev",
-      "runtimeExecutable": "C:/Program Files/nodejs/npx.cmd",
-      "runtimeArgs": ["vite", "--port", "5173"],
-      "port": 5173,
-      "cwd": "D:/DEV/EVA-Web"
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["node_modules/vite/bin/vite.js", "--host"],
+      "port": 3000
     }
   ]
 }

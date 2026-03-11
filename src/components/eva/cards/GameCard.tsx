@@ -37,21 +37,26 @@ export function GameCard({ event }: { event: ToolEvent }) {
         {question && <p className="text-sm font-medium text-gray-800 mb-3">{question}</p>}
         {options.length > 0 && (
           <div className="grid grid-cols-2 gap-2">
-            {options.map((opt, i) => (
-              <button
-                key={i}
-                onClick={() => setSelected(opt)}
-                className={`px-3 py-2 text-sm rounded-lg border transition-colors cursor-pointer ${
-                  selected === opt
-                    ? answer && opt === answer ? 'bg-green-100 border-green-300 text-green-800'
-                    : answer && selected !== null ? 'bg-red-100 border-red-300 text-red-800'
-                    : 'bg-yellow-100 border-yellow-300 text-yellow-800'
-                    : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-yellow-50'
-                }`}
-              >
-                {opt}
-              </button>
-            ))}
+            {options.map((opt, i) => {
+              let cls = 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-yellow-50';
+              if (selected !== null) {
+                if (opt === answer) {
+                  cls = 'bg-green-100 border-green-300 text-green-800';
+                } else if (opt === selected && opt !== answer) {
+                  cls = 'bg-red-100 border-red-300 text-red-800';
+                }
+              }
+              return (
+                <button
+                  key={i}
+                  onClick={() => { if (!selected) setSelected(opt); }}
+                  disabled={selected !== null}
+                  className={`px-3 py-2 text-sm rounded-lg border transition-colors cursor-pointer disabled:cursor-default ${cls}`}
+                >
+                  {opt}
+                </button>
+              );
+            })}
           </div>
         )}
         {!question && msg && <p className="text-sm text-gray-600">{msg}</p>}

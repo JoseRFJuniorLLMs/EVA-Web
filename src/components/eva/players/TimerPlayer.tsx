@@ -22,25 +22,30 @@ export const TimerPlayer = memo(function TimerPlayer({ event, onClose }: TimerPl
         if (r <= 1) {
           clearInterval(intervalRef.current!);
           setRunning(false);
+          // Notify when timer completes
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification(`Timer: ${label}`, { body: 'Tempo esgotado!' });
+          }
           return 0;
         }
         return r - 1;
       });
     }, 1000);
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [running]);
+  }, [running, label]);
 
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;
-  const pct = ((duration - remaining) / duration) * 100;
+  const circumference = 2 * Math.PI * 15; // ~94.25
+  const progress = ((duration - remaining) / duration) * circumference;
 
   return (
-    <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-t-xl shadow-lg">
+    <div className={`flex items-center gap-3 px-4 py-2 text-white rounded-t-xl shadow-lg ${remaining === 0 ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-red-500 to-orange-500'}`}>
       <div className="relative w-10 h-10">
         <svg className="w-10 h-10 -rotate-90" viewBox="0 0 36 36">
           <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="3" />
           <circle cx="18" cy="18" r="15" fill="none" stroke="white" strokeWidth="3"
-            strokeDasharray={`${pct} ${100 - pct}`} strokeLinecap="round" />
+            strokeDasharray={`${progress} ${circumference - progress}`} strokeLinecap="round" />
         </svg>
         <Timer className="w-4 h-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
       </div>

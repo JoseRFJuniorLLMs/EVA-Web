@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -9,6 +9,9 @@ const ALLOWED_ROUTES = new Set([
   '/anemia-falciforme', '/epidemio/mapa', '/galeria', '/reports',
   '/clinics', '/users', '/settings', '/profile', '/comunicacoes', '/eva',
 ]);
+
+// Allowed URL protocols for open_url
+const SAFE_PROTOCOLS = new Set(['http:', 'https:']);
 
 export interface UiAction {
   action: string;
@@ -26,8 +29,12 @@ interface UseUiActionsOptions {
 
 export function useUiActions(options: UseUiActionsOptions = {}) {
   const navigate = useNavigate();
+  // Use ref to avoid options identity in dependency array
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
 
   const executeAction = useCallback((action: UiAction) => {
+    const opts = optionsRef.current;
     switch (action.action) {
       case 'navigate': {
         const route = action.target;
@@ -40,6 +47,10 @@ export function useUiActions(options: UseUiActionsOptions = {}) {
 
       case 'open_url': {
         if (action.url) {
+          try {
+            const parsed = new URL(action.url);
+            if (!SAFE_PROTOCOLS.has(parsed.protocol)) break;
+          } catch { break; }
           window.open(action.url, '_blank', 'noopener,noreferrer');
           toast.info(action.title || 'Página aberta');
         }
@@ -47,17 +58,17 @@ export function useUiActions(options: UseUiActionsOptions = {}) {
       }
 
       case 'switch_mode': {
-        if (action.mode && options.onSwitchMode) {
-          options.onSwitchMode(action.mode);
+        if (action.mode && opts.onSwitchMode) {
+          opts.onSwitchMode(action.mode);
           toast.info(`Modo alterado para ${action.mode}`);
         }
         break;
       }
 
       case 'play_media': {
-        if (action.url && options.onPlayMedia) {
+        if (action.url && opts.onPlayMedia) {
           const type = action.url.match(/\.(mp4|webm|ogg|mov)/) ? 'video' : 'audio';
-          options.onPlayMedia(action.url, type);
+          opts.onPlayMedia(action.url, type);
         }
         break;
       }
@@ -88,7 +99,7 @@ export function useUiActions(options: UseUiActionsOptions = {}) {
       default:
         console.warn('[UI_ACTION] Unknown action:', action.action);
     }
-  }, [navigate, options]);
+  }, [navigate]);
 
   return { executeAction };
 }

@@ -6,9 +6,9 @@ export function useVideoCapture() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoStreamRef = useRef<MediaStream | null>(null);
   const frameIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const canvasDimsRef = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
 
   const captureAndSendFrame = useCallback((sendFrame: (base64: string) => void) => {
-    // Skip frame capture when tab is in background — frees CPU for audio
     if (document.hidden) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -19,7 +19,11 @@ export function useVideoCapture() {
     const maxSize = 768;
     let w = video.videoWidth, h = video.videoHeight;
     if (w > maxSize || h > maxSize) { const scale = maxSize / Math.max(w, h); w = Math.round(w * scale); h = Math.round(h * scale); }
-    canvas.width = w; canvas.height = h;
+    // Only resize canvas when dimensions change
+    if (canvasDimsRef.current.w !== w || canvasDimsRef.current.h !== h) {
+      canvas.width = w; canvas.height = h;
+      canvasDimsRef.current = { w, h };
+    }
     ctx.drawImage(video, 0, 0, w, h);
     const base64 = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
     sendFrame(base64);
@@ -46,6 +50,7 @@ export function useVideoCapture() {
       }
       videoStreamRef.current = stream;
       if (videoRef.current) videoRef.current.srcObject = stream;
+      if (frameIntervalRef.current) clearInterval(frameIntervalRef.current);
       frameIntervalRef.current = setInterval(() => captureAndSendFrame(sendFrame), 1000);
       return true;
     } catch {
@@ -63,16 +68,18 @@ export function useVideoCapture() {
     return startVideoCapture(newMode, sendFrame, onScreenEnd);
   }, [stopVideoCapture, startVideoCapture]);
 
+  const startFrameCapture = useCallback((sendFrame: (base64: string) => void) => {
+    if (!frameIntervalRef.current) {
+      frameIntervalRef.current = setInterval(() => captureAndSendFrame(sendFrame), 1000);
+    }
+  }, [captureAndSendFrame]);
+
   return {
     videoRef,
     canvasRef,
     startVideoCapture,
     stopVideoCapture,
     switchVideoMode,
-    startFrameCapture: (sendFrame: (base64: string) => void) => {
-      if (!frameIntervalRef.current) {
-        frameIntervalRef.current = setInterval(() => captureAndSendFrame(sendFrame), 1000);
-      }
-    },
+    startFrameCapture,
   };
 }

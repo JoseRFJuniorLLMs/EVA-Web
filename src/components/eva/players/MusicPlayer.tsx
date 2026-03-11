@@ -24,14 +24,34 @@ export const MusicPlayer = memo(function MusicPlayer({ event, onClose, isSpeakin
   useEffect(() => {
     const el = audioRef.current;
     if (!el || !url) return;
+    const onEnded = () => setIsPlaying(false);
+    const onError = () => setIsPlaying(false);
+    el.addEventListener('ended', onEnded);
+    el.addEventListener('error', onError);
     el.play().catch(() => setIsPlaying(false));
+    return () => {
+      el.removeEventListener('ended', onEnded);
+      el.removeEventListener('error', onError);
+    };
   }, [url]);
 
-  // Duck music volume when EVA is speaking to prevent audio competition
+  // Duck music volume when EVA is speaking — smooth transition
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
-    el.volume = isSpeaking ? 0.08 : 1.0;
+    const target = isSpeaking ? 0.08 : 1.0;
+    // Smooth volume transition over 300ms
+    const start = el.volume;
+    const diff = target - start;
+    if (Math.abs(diff) < 0.01) { el.volume = target; return; }
+    let frame = 0;
+    const steps = 10;
+    const interval = setInterval(() => {
+      frame++;
+      el.volume = Math.max(0, Math.min(1, start + diff * (frame / steps)));
+      if (frame >= steps) clearInterval(interval);
+    }, 30);
+    return () => clearInterval(interval);
   }, [isSpeaking]);
 
   // Cleanup audio element on unmount to release audio device

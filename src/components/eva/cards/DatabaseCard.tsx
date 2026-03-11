@@ -23,7 +23,7 @@ export function DatabaseCard({ event }: { event: ToolEvent }) {
         {count > 0 && <span className="text-xs text-gray-500 ml-auto">{count} rows</span>}
       </div>
       {query && (
-        <div className="px-3 py-1.5 bg-gray-850 border-b border-gray-700">
+        <div className="px-3 py-1.5 bg-gray-800 border-b border-gray-700">
           <pre className="text-xs text-yellow-300 whitespace-pre-wrap">{query}</pre>
         </div>
       )}

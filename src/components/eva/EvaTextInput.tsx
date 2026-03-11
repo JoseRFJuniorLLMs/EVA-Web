@@ -41,6 +41,7 @@ export const EvaTextInput = memo(function EvaTextInput({ onSend, disabled, place
       <button
         onClick={handleSend}
         disabled={disabled || !text.trim()}
+        aria-label="Enviar mensagem"
         className="p-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
       >
         <Send className="w-4 h-4" />

@@ -29,7 +29,7 @@ export function EvaPage() {
     setIsAuthenticated(false);
     setCpf('');
     setGoogleStatus(null);
-  }, [session]);
+  }, [session.stopSession]);
 
   if (!isAuthenticated) {
     return <EvaLoginScreen onAuthenticated={handleAuthenticated} />;
@@ -38,7 +38,7 @@ export function EvaPage() {
   const isActive = session.sessionStatus === 'active' || session.sessionStatus === 'connecting';
 
   return (
-    <div className="flex flex-col h-[calc(100vh-7rem)]">
+    <div className="flex flex-col h-dvh p-4 pb-0 overflow-hidden">
       {/* Hidden video/canvas for capture */}
       <video ref={session.videoRef} autoPlay playsInline muted className="absolute w-px h-px opacity-0 pointer-events-none" />
       <canvas ref={session.canvasRef} className="absolute w-px h-px opacity-0 pointer-events-none" />
@@ -55,7 +55,7 @@ export function EvaPage() {
       />
 
       {!isActive && session.sessionStatus !== 'error' ? (
-        <div className="flex-1 overflow-y-auto py-6">
+        <div className="flex-1 min-h-0 overflow-y-auto py-4">
           <EvaIdleView
             isAuthenticated={isAuthenticated}
             showVideoOptions={session.showVideoOptions}

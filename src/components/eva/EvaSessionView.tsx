@@ -76,10 +76,10 @@ export const EvaSessionView = memo(function EvaSessionView({
   }, [toolEvents]);
 
   return (
-    <>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       {/* Speaker recognition badge */}
       {speakerInfo && isActive && (
-        <div className="flex items-center gap-3 px-4 py-2 border-b border-gray-100 bg-gray-50/50">
+        <div className="shrink-0 flex items-center gap-3 px-4 py-2 border-b border-gray-100 bg-gray-50/50">
           <div className="flex items-center gap-2">
             <User className="w-3.5 h-3.5 text-gray-500" />
             <span className="text-xs font-medium text-gray-700">
@@ -114,24 +114,22 @@ export const EvaSessionView = memo(function EvaSessionView({
         </div>
       )}
 
-      {/* SOS — DESATIVADO */}
-
       {/* Mode switch bar */}
       {sessionStatus === 'active' && (
-        <div className="flex items-center justify-center gap-2 px-4 py-2 border-b border-gray-100 bg-gray-50/50">
+        <div className="shrink-0 flex items-center justify-center gap-2 px-4 py-2 border-b border-gray-100 bg-gray-50/50">
           <span className="text-xs text-gray-400 mr-2">Modo:</span>
           {([
-            { mode: 'voice' as SessionMode, icon: Mic, label: 'Voz', color: 'emerald' },
-            { mode: 'screen' as SessionMode, icon: Monitor, label: 'Tela', color: 'blue' },
-            { mode: 'camera' as SessionMode, icon: Camera, label: 'Câmera', color: 'indigo' },
-          ]).map(({ mode, icon: Icon, label, color }) => (
+            { mode: 'voice' as SessionMode, icon: Mic, label: 'Voz', active: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-300' },
+            { mode: 'screen' as SessionMode, icon: Monitor, label: 'Tela', active: 'bg-blue-100 text-blue-700 ring-1 ring-blue-300' },
+            { mode: 'camera' as SessionMode, icon: Camera, label: 'Câmera', active: 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-300' },
+          ]).map(({ mode, icon: Icon, label, active }) => (
             <button
               key={mode}
               onClick={() => onSwitchMode(mode)}
               aria-label={`Modo ${label}`}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 activeMode === mode
-                  ? `bg-${color}-100 text-${color}-700 ring-1 ring-${color}-300`
+                  ? active
                   : 'bg-white text-gray-500 hover:bg-gray-100 border border-gray-200'
               }`}
             >
@@ -144,7 +142,7 @@ export const EvaSessionView = memo(function EvaSessionView({
 
       {/* Waveform bar */}
       {isActive && (
-        <div className="px-4 pt-3 pb-2 border-b border-gray-100">
+        <div className="shrink-0 px-4 pt-3 pb-2 border-b border-gray-100">
           <canvas
             ref={waveCanvasRef}
             style={{ width: '100%', height: '52px', display: 'block' }}
@@ -160,7 +158,7 @@ export const EvaSessionView = memo(function EvaSessionView({
       {isActive && <EvaQuickActions onAction={onSendText} />}
 
       {/* Content area */}
-      <div className="flex-1 overflow-y-auto py-6">
+      <div className="flex-1 min-h-0 overflow-y-auto py-4">
         {/* Service dashboard cards */}
         {isActive && (
           <div className="px-2 py-3">
@@ -249,20 +247,26 @@ export const EvaSessionView = memo(function EvaSessionView({
 
       {/* Persistent players */}
       {activeMusic && isActive && (
-        <MusicPlayer event={activeMusic} onClose={() => onDismissEvent(activeMusic.id)} isSpeaking={isSpeaking} />
+        <div className="shrink-0">
+          <MusicPlayer event={activeMusic} onClose={() => onDismissEvent(activeMusic.id)} isSpeaking={isSpeaking} />
+        </div>
       )}
       {activeTimer && isActive && (
-        <TimerPlayer event={activeTimer} onClose={() => onDismissEvent(activeTimer.id)} />
+        <div className="shrink-0">
+          <TimerPlayer event={activeTimer} onClose={() => onDismissEvent(activeTimer.id)} />
+        </div>
       )}
 
       {/* Text input bar */}
       {isActive && (
-        <EvaTextInput
-          onSend={onSendText}
-          disabled={sessionStatus !== 'active'}
-          placeholder={t('eva.startTalking')}
-        />
+        <div className="shrink-0">
+          <EvaTextInput
+            onSend={onSendText}
+            disabled={sessionStatus !== 'active'}
+            placeholder={t('eva.startTalking')}
+          />
+        </div>
       )}
-    </>
+    </div>
   );
 });

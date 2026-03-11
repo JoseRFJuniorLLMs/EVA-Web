@@ -39,7 +39,7 @@ export async function decodeAudioData(
     sampleRate
   );
 
-  const int16 = new Int16Array(data.buffer);
+  const int16 = new Int16Array(data.buffer, data.byteOffset, data.byteLength / 2);
   const float32 = new Float32Array(int16.length);
   for (let i = 0; i < int16.length; i++) {
     float32[i] = int16[i] / 32768;
