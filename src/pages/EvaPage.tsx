@@ -76,7 +76,6 @@ export function EvaPage() {
           activeMusic={session.activeMusic}
           activeTimer={session.activeTimer}
           waveCanvasRef={session.waveCanvasRef}
-          onSendText={session.sendTextMessage}
           onDismissEvent={session.dismissEvent}
           onSwitchMode={session.switchMode}
           t={t}

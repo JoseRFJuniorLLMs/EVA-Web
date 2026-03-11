@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "eva-web-dev",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["node_modules/vite/bin/vite.js", "--host"],
+      "runtimeExecutable": "node.exe",
+      "runtimeArgs": ["node_modules/vite/bin/vite.js", "--host", "--port", "3000"],
       "port": 3000
     }
   ]

@@ -145,7 +145,7 @@ export function useEvaSession(cpf: string, t: (key: string) => string) {
                 if (mode !== 'voice') {
                   videoCapture.startFrameCapture(sendFrame);
                 }
-              } else if (msg.text === 'interrupted') {
+              } else if (msg.text === 'interrupted' || msg.text === 'reconnecting') {
                 audioEngine.handleInterrupted();
               } else if (msg.text === 'turn_complete') {
                 // Reduced from 500ms to 200ms — long delay caused perceived voice gaps

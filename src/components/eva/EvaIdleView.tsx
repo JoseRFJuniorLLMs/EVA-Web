@@ -20,10 +20,15 @@ export function EvaIdleView({ isAuthenticated, showVideoOptions, onStartSession,
 
   useEffect(() => {
     if (!isAuthenticated) return;
+    const token = localStorage.getItem('auth_token');
+    if (!token) { setCapLoading(false); return; }
     const controller = new AbortController();
     setCapLoading(true);
-    fetch('/api/v1/self/memories?type=capability&limit=50', { signal: controller.signal })
-      .then(r => r.json())
+    fetch('/api/v1/self/memories?type=capability&limit=50', {
+      signal: controller.signal,
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
       .then(data => {
         if (Array.isArray(data.memories)) {
           setCapabilities(data.memories.map((m: { id: string; content: string }) => ({ id: m.id, content: m.content })));

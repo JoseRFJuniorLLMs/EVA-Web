@@ -58,7 +58,7 @@ const CATEGORY_CARD: Record<string, React.ComponentType<{ event: ToolEvent }>> =
 };
 
 // Music and timer are handled as persistent players, not inline cards
-const SKIP_INLINE = new Set(['music', 'timer']);
+const SKIP_INLINE = new Set(['music', 'timer', 'selfaware', 'generic']);
 
 export const EvaToolCard = memo(function EvaToolCard({ event }: { event: ToolEvent }) {
   const category = getToolCategory(event.tool);

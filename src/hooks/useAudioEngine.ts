@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { createBlob, decode, decodeAudioData } from '../utils/audioUtils';
 
-const MAX_SOURCES = 64;
 /** Draw waveform at ~15fps instead of 60fps to avoid starving the audio thread */
 const WAVEFORM_INTERVAL_MS = 66;
 
@@ -91,7 +90,7 @@ export function useAudioEngine() {
     if (animFrameRef.current) { cancelAnimationFrame(animFrameRef.current); }
 
     const inputCtx = new AudioContext({ sampleRate: 16000 });
-    const outputCtx = new AudioContext({ sampleRate: 24000 });
+    const outputCtx = new AudioContext({ sampleRate: 24000, latencyHint: 'playback' });
     inputAudioCtxRef.current = inputCtx;
     outputAudioCtxRef.current = outputCtx;
 
@@ -117,9 +116,7 @@ export function useAudioEngine() {
     await inputCtx.resume();
     await outputCtx.resume();
 
-    const micStream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-    });
+    const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     micStreamRef.current = micStream;
 
     return micStream;
@@ -164,11 +161,6 @@ export function useAudioEngine() {
       nextStartTimeRef.current += audioBuffer.duration;
       sourcesRef.current.add(source);
       source.onended = () => sourcesRef.current.delete(source);
-      // Prevent unbounded growth
-      if (sourcesRef.current.size > MAX_SOURCES) {
-        const oldest = sourcesRef.current.values().next().value;
-        if (oldest) { try { oldest.stop(); } catch { /* */ } sourcesRef.current.delete(oldest); }
-      }
     } catch (err) {
       console.warn('[AudioEngine] audio decode error (chunk dropped):', err);
     }

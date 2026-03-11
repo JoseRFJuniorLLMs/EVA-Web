@@ -1,33 +1,10 @@
-import { useRef, useEffect, useMemo, memo } from 'react';
-import { Mic, Monitor, Camera, User, Mail, Calendar, PlayCircle, HardDrive, Search, MapPin, MessageSquare, Bell } from 'lucide-react';
-import { EvaTextInput } from './EvaTextInput';
+import { useRef, useEffect, memo } from 'react';
+import { Mic, Monitor, Camera, User } from 'lucide-react';
 import { EvaToolCard } from './EvaToolCard';
-import { EvaQuickActions } from './EvaQuickActions';
 import { MusicPlayer } from './players/MusicPlayer';
 import { TimerPlayer } from './players/TimerPlayer';
 import type { SessionMode, SessionStatus, ChatMessage, SpeakerInfo } from '../../types/eva-session';
 import type { ToolEvent } from '../../types/eva-tools';
-
-const SERVICE_CARDS = [
-  { id: 'email', icon: Mail, label: 'Gmail', color: 'red', tools: ['send_email', 'new_email'] },
-  { id: 'calendar', icon: Calendar, label: 'Calendar', color: 'blue', tools: ['manage_calendar_event'] },
-  { id: 'video', icon: PlayCircle, label: 'YouTube', color: 'red', tools: ['search_videos', 'play_video'] },
-  { id: 'drive', icon: HardDrive, label: 'Drive', color: 'green', tools: ['save_to_drive'] },
-  { id: 'search', icon: Search, label: 'Web Search', color: 'indigo', tools: ['web_search'] },
-  { id: 'maps', icon: MapPin, label: 'Maps', color: 'emerald', tools: ['find_nearby_places'] },
-  { id: 'messaging', icon: MessageSquare, label: 'Messages', color: 'purple', tools: ['send_whatsapp', 'send_telegram'] },
-  { id: 'reminders', icon: Bell, label: 'Reminders', color: 'amber', tools: ['schedule_task', 'list_scheduled_tasks'] },
-] as const;
-
-const COLOR_MAP: Record<string, { bg: string; border: string; text: string; icon: string; activeBg: string }> = {
-  red:     { bg: 'bg-red-50',     border: 'border-red-200',     text: 'text-red-700',     icon: 'text-red-500',     activeBg: 'bg-red-100' },
-  blue:    { bg: 'bg-blue-50',    border: 'border-blue-200',    text: 'text-blue-700',    icon: 'text-blue-500',    activeBg: 'bg-blue-100' },
-  green:   { bg: 'bg-green-50',   border: 'border-green-200',   text: 'text-green-700',   icon: 'text-green-500',   activeBg: 'bg-green-100' },
-  indigo:  { bg: 'bg-indigo-50',  border: 'border-indigo-200',  text: 'text-indigo-700',  icon: 'text-indigo-500',  activeBg: 'bg-indigo-100' },
-  emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', icon: 'text-emerald-500', activeBg: 'bg-emerald-100' },
-  purple:  { bg: 'bg-purple-50',  border: 'border-purple-200',  text: 'text-purple-700',  icon: 'text-purple-500',  activeBg: 'bg-purple-100' },
-  amber:   { bg: 'bg-amber-50',   border: 'border-amber-200',   text: 'text-amber-700',   icon: 'text-amber-500',   activeBg: 'bg-amber-100' },
-};
 
 interface EvaSessionViewProps {
   messages: ChatMessage[];
@@ -40,7 +17,6 @@ interface EvaSessionViewProps {
   activeMusic: ToolEvent | null;
   activeTimer: ToolEvent | null;
   waveCanvasRef: React.RefObject<HTMLCanvasElement>;
-  onSendText: (text: string) => void;
   onDismissEvent: (id: string) => void;
   onSwitchMode: (mode: SessionMode) => void;
   t: (key: string) => string;
@@ -49,7 +25,7 @@ interface EvaSessionViewProps {
 export const EvaSessionView = memo(function EvaSessionView({
   messages, subtitleText, activeMode, isSpeaking, sessionStatus,
   toolEvents, activeMusic, activeTimer,
-  waveCanvasRef, onSendText, onDismissEvent, onSwitchMode, t, speakerInfo,
+  waveCanvasRef, onDismissEvent, onSwitchMode, t, speakerInfo,
 }: EvaSessionViewProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollThrottleRef = useRef(false);
@@ -65,15 +41,6 @@ export const EvaSessionView = memo(function EvaSessionView({
   }, [messages, subtitleText]);
 
   const isActive = sessionStatus === 'active' || sessionStatus === 'connecting';
-
-  // Memoize service card counts — avoid 8x .filter() on every re-render
-  const serviceCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const card of SERVICE_CARDS) {
-      counts[card.id] = toolEvents.filter(ev => (card.tools as readonly string[]).includes(ev.tool)).length;
-    }
-    return counts;
-  }, [toolEvents]);
 
   return (
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
@@ -154,54 +121,8 @@ export const EvaSessionView = memo(function EvaSessionView({
         </div>
       )}
 
-      {/* Quick Actions */}
-      {isActive && <EvaQuickActions onAction={onSendText} />}
-
       {/* Content area */}
       <div className="flex-1 min-h-0 overflow-y-auto py-4">
-        {/* Service dashboard cards */}
-        {isActive && (
-          <div className="px-2 py-3">
-            <div className="grid grid-cols-4 gap-2">
-              {SERVICE_CARDS.map(card => {
-                const colors = COLOR_MAP[card.color] || COLOR_MAP.blue;
-                const Icon = card.icon;
-                const count = serviceCounts[card.id] || 0;
-                const hasData = count > 0;
-                return (
-                  <div
-                    key={card.id}
-                    className={`relative flex flex-col items-center gap-1 px-2 py-3 rounded-xl border transition-all ${
-                      hasData
-                        ? `${colors.activeBg} ${colors.border} shadow-sm`
-                        : 'bg-gray-50 border-gray-200 opacity-60'
-                    }`}
-                  >
-                    <Icon className={`w-5 h-5 ${hasData ? colors.icon : 'text-gray-400'}`} />
-                    <span className={`text-[10px] font-semibold ${hasData ? colors.text : 'text-gray-500'}`}>{card.label}</span>
-                    {hasData && (
-                      <span className={`absolute -top-1 -right-1 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center text-white ${
-                        card.color === 'red' ? 'bg-red-500' :
-                        card.color === 'blue' ? 'bg-blue-500' :
-                        card.color === 'green' ? 'bg-green-500' :
-                        card.color === 'indigo' ? 'bg-indigo-500' :
-                        card.color === 'emerald' ? 'bg-emerald-500' :
-                        card.color === 'purple' ? 'bg-purple-500' :
-                        'bg-amber-500'
-                      }`}>
-                        {count}
-                      </span>
-                    )}
-                    {!hasData && (
-                      <span className="text-[9px] text-gray-400">—</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {/* Transcription messages + Tool cards */}
         {isActive && (
           <div className="space-y-3 px-2">
@@ -254,17 +175,6 @@ export const EvaSessionView = memo(function EvaSessionView({
       {activeTimer && isActive && (
         <div className="shrink-0">
           <TimerPlayer event={activeTimer} onClose={() => onDismissEvent(activeTimer.id)} />
-        </div>
-      )}
-
-      {/* Text input bar */}
-      {isActive && (
-        <div className="shrink-0">
-          <EvaTextInput
-            onSend={onSendText}
-            disabled={sessionStatus !== 'active'}
-            placeholder={t('eva.startTalking')}
-          />
         </div>
       )}
     </div>
